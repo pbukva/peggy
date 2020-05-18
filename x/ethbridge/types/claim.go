@@ -88,7 +88,7 @@ func CreateOracleClaimFromEthClaim(cdc *codec.Codec, ethClaim EthBridgeClaim) (o
 func CreateEthClaimFromOracleString(
 	ethereumChainID int, bridgeContract EthereumAddress, nonce int,
 	ethereumAddress EthereumAddress, validator sdk.ValAddress, oracleClaimString string,
-) (EthBridgeClaim, error) {
+) (EthBridgeClaim, sdk.Error) {
 	oracleClaim, err := CreateOracleClaimFromOracleString(oracleClaimString)
 	if err != nil {
 		return EthBridgeClaim{}, err
@@ -111,7 +111,7 @@ func CreateEthClaimFromOracleString(
 // CreateOracleClaimFromOracleString converts a JSON string into an OracleClaimContent struct used by this module.
 // In general, it is expected that the oracle module will store claims in this JSON format
 // and so this should be used to convert oracle claims.
-func CreateOracleClaimFromOracleString(oracleClaimString string) (OracleClaimContent, error) {
+func CreateOracleClaimFromOracleString(oracleClaimString string) (OracleClaimContent, sdk.Error) {
 	var oracleClaimContent OracleClaimContent
 
 	bz := []byte(oracleClaimString)

@@ -77,6 +77,7 @@ type AppModule struct {
 	SupplyKeeper  types.SupplyKeeper
 	AccountKeeper types.AccountKeeper
 	BridgeKeeper  Keeper
+	Codespace     sdk.CodespaceType
 	Codec         *codec.Codec
 }
 
@@ -84,7 +85,7 @@ type AppModule struct {
 func NewAppModule(
 	oracleKeeper types.OracleKeeper, supplyKeeper types.SupplyKeeper,
 	accountKeeper types.AccountKeeper, bridgeKeeper Keeper,
-	cdc *codec.Codec) AppModule {
+	codespace sdk.CodespaceType, cdc *codec.Codec) AppModule {
 
 	return AppModule{
 		AppModuleBasic:      AppModuleBasic{},
@@ -95,6 +96,7 @@ func NewAppModule(
 		AccountKeeper: accountKeeper,
 		BridgeKeeper:  bridgeKeeper,
 		Codec:         cdc,
+		Codespace:     codespace,
 	}
 }
 
@@ -124,7 +126,7 @@ func (AppModule) QuerierRoute() string {
 
 // NewQuerierHandler returns the ethbridge module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.OracleKeeper, am.Codec)
+	return NewQuerier(am.OracleKeeper, am.Codec, am.Codespace)
 }
 
 // InitGenesis performs genesis initialization for the ethbridge module. It returns

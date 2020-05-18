@@ -20,14 +20,16 @@ type Keeper struct {
 
 	supplyKeeper types.SupplyKeeper
 	oracleKeeper types.OracleKeeper
+	codespace    sdk.CodespaceType
 }
 
 // NewKeeper creates new instances of the oracle Keeper
-func NewKeeper(cdc *codec.Codec, supplyKeeper types.SupplyKeeper, oracleKeeper types.OracleKeeper) Keeper {
+func NewKeeper(cdc *codec.Codec, supplyKeeper types.SupplyKeeper, oracleKeeper types.OracleKeeper, codespace sdk.CodespaceType) Keeper {
 	return Keeper{
 		cdc:          cdc,
 		supplyKeeper: supplyKeeper,
 		oracleKeeper: oracleKeeper,
+		codespace: 	  codespace,
 	}
 }
 
@@ -36,18 +38,23 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
+// Codespace returns the codespace
+func (k Keeper) Codespace() sdk.CodespaceType {
+	return k.codespace
+}
+
 // ProcessClaim processes a new claim coming in from a validator
-func (k Keeper) ProcessClaim(ctx sdk.Context, claim types.EthBridgeClaim) (oracle.Status, error) {
+func (k Keeper) ProcessClaim(ctx sdk.Context, claim types.EthBridgeClaim) (oracle.Status, sdk.Error) {
 	oracleClaim, err := types.CreateOracleClaimFromEthClaim(k.cdc, claim)
 	if err != nil {
-		return oracle.Status{}, err
+		return oracle.Status{}, types.ErrJSONMarshalling(k.Codespace())
 	}
 
 	return k.oracleKeeper.ProcessClaim(ctx, oracleClaim)
 }
 
 // ProcessSuccessfulClaim processes a claim that has just completed successfully with consensus
-func (k Keeper) ProcessSuccessfulClaim(ctx sdk.Context, claim string) error {
+func (k Keeper) ProcessSuccessfulClaim(ctx sdk.Context, claim string) sdk.Error {
 	oracleClaim, err := types.CreateOracleClaimFromOracleString(claim)
 	if err != nil {
 		return err
@@ -65,7 +72,7 @@ func (k Keeper) ProcessSuccessfulClaim(ctx sdk.Context, claim string) error {
 		coins = sdk.Coins{sdk.NewInt64Coin(oracleClaim.Symbol, oracleClaim.Amount)}
 		err = k.supplyKeeper.MintCoins(ctx, types.ModuleName, coins)
 	default:
-		err = types.ErrInvalidClaimType
+		err = types.ErrInvalidClaimType()
 	}
 
 	if err != nil {
@@ -82,7 +89,7 @@ func (k Keeper) ProcessSuccessfulClaim(ctx sdk.Context, claim string) error {
 }
 
 // ProcessBurn processes the burn of bridged coins from the given sender
-func (k Keeper) ProcessBurn(ctx sdk.Context, cosmosSender sdk.AccAddress, amount sdk.Coins) error {
+func (k Keeper) ProcessBurn(ctx sdk.Context, cosmosSender sdk.AccAddress, amount sdk.Coins) sdk.Error {
 	if err := k.supplyKeeper.SendCoinsFromAccountToModule(
 		ctx, cosmosSender, types.ModuleName, amount,
 	); err != nil {

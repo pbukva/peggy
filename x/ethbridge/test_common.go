@@ -1,6 +1,7 @@
 package ethbridge
 
 import (
+	"github.com/cosmos/peggy/x/ethbridge/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,7 +22,7 @@ func CreateTestHandler(
 	supplyKeeper.SetModuleAccount(ctx, bridgeAccount)
 
 	cdc := keeperLib.MakeTestCodec()
-	bridgeKeeper := NewKeeper(cdc, supplyKeeper, oracleKeeper)
+	bridgeKeeper := NewKeeper(cdc, supplyKeeper, oracleKeeper, types.DefaultCodespace)
 	handler := NewHandler(accountKeeper, bridgeKeeper, cdc)
 
 	return ctx, oracleKeeper, bankKeeper, supplyKeeper, accountKeeper, validatorAddresses, handler

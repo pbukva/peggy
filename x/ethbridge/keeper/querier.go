@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-	"github.com/Workiva/go-datastructures/threadsafe/err"
 	"strconv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -50,6 +48,10 @@ func queryEthProphecy(
 	}
 
 	response := types.NewQueryEthProphecyResponse(prophecy.ID, prophecy.Status, bridgeClaims)
+	data, err2 := cdc.MarshalJSONIndent(response, "", "  ")
+	if (err2 != nil) {
+		return data, sdk.ErrInternal(sdk.AppendMsgToErr("JSON dentation failed for received Eth Prohpesy Response: %s", err.Error()))
+	}
 
-	return cdc.MarshalJSONIndent(response, "", "  ")
+	return data, nil
 }

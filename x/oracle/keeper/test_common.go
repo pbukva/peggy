@@ -81,7 +81,7 @@ func CreateTestKeepers(t *testing.T, consensusNeeded float64, validatorAmounts [
 	blacklistedAddrs[notBondedPool.GetAddress().String()] = true
 	blacklistedAddrs[bondPool.GetAddress().String()] = true
 
-	paramsKeeper := params.NewKeeper(cdc, keyParams, tkeyParams)
+	paramsKeeper := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 
 	accountKeeper := auth.NewAccountKeeper(
 		cdc,    // amino codec
@@ -93,6 +93,7 @@ func CreateTestKeepers(t *testing.T, consensusNeeded float64, validatorAmounts [
 	bankKeeper := bank.NewBaseKeeper(
 		accountKeeper,
 		paramsKeeper.Subspace(bank.DefaultParamspace),
+		bank.DefaultCodespace,
 		blacklistedAddrs,
 	)
 
@@ -113,9 +114,9 @@ func CreateTestKeepers(t *testing.T, consensusNeeded float64, validatorAmounts [
 
 	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
-	stakingKeeper := staking.NewKeeper(cdc, keyStaking, supplyKeeper, paramsKeeper.Subspace(staking.DefaultParamspace))
+	stakingKeeper := staking.NewKeeper(cdc, keyStaking, tkeyStaking, supplyKeeper, paramsKeeper.Subspace(staking.DefaultParamspace), stakingtypes.DefaultCodespace)
 	stakingKeeper.SetParams(ctx, stakingtypes.DefaultParams())
-	oracleKeeper := NewKeeper(cdc, keyOracle, stakingKeeper, consensusNeeded)
+	oracleKeeper := NewKeeper(cdc, keyOracle, stakingKeeper, types.DefaultCodespace, consensusNeeded)
 
 	// set module accounts
 	err = notBondedPool.SetCoins(totalSupply)

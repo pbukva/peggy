@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"github.com/Workiva/go-datastructures/threadsafe/err"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -10,7 +9,7 @@ import (
 type CodeType = sdk.CodeType
 
 // Exported code type numbers
-var (
+const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
 	CodeProphecyNotFound              CodeType = 1

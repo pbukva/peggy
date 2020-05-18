@@ -17,6 +17,7 @@ type Keeper struct {
 	storeKey sdk.StoreKey // Unexposed key to access store from sdk.Context
 
 	stakeKeeper types.StakingKeeper
+	codespace   sdk.CodespaceType
 
 	// TODO: use this as param instead
 	consensusNeeded float64 // The minimum % of stake needed to sign claims in order for consensus to occur
@@ -24,15 +25,16 @@ type Keeper struct {
 
 // NewKeeper creates new instances of the oracle Keeper
 func NewKeeper(
-	cdc *codec.Codec, storeKey sdk.StoreKey, stakeKeeper types.StakingKeeper, consensusNeeded float64,
+	cdc *codec.Codec, storeKey sdk.StoreKey, stakeKeeper types.StakingKeeper, codespace sdk.CodespaceType, consensusNeeded float64,
 ) Keeper {
 	if consensusNeeded <= 0 || consensusNeeded > 1 {
-		panic(types.ErrMinimumConsensusNeededInvalid.Error())
+		panic(types.ErrMinimumConsensusNeededInvalid(codespace).Error())
 	}
 	return Keeper{
 		cdc:             cdc,
 		storeKey:        storeKey,
 		stakeKeeper:     stakeKeeper,
+		codespace: 		 codespace,
 		consensusNeeded: consensusNeeded,
 	}
 }
@@ -40,6 +42,11 @@ func NewKeeper(
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+// Codespace returns the codespace
+func (k Keeper) Codespace() sdk.CodespaceType {
+	return k.codespace
 }
 
 // GetProphecy gets the entire prophecy data struct for a given id
@@ -73,18 +80,18 @@ func (k Keeper) setProphecy(ctx sdk.Context, prophecy types.Prophecy) {
 }
 
 // ProcessClaim ...
-func (k Keeper) ProcessClaim(ctx sdk.Context, claim types.Claim) (types.Status, error) {
+func (k Keeper) ProcessClaim(ctx sdk.Context, claim types.Claim) (types.Status, sdk.Error) {
 	activeValidator := k.checkActiveValidator(ctx, claim.ValidatorAddress)
 	if !activeValidator {
-		return types.Status{}, types.ErrInvalidValidator
+		return types.Status{}, types.ErrInvalidValidator(k.Codespace())
 	}
 
 	if claim.ID == "" {
-		return types.Status{}, types.ErrInvalidIdentifier
+		return types.Status{}, types.ErrInvalidIdentifier(k.Codespace())
 	}
 
 	if claim.Content == "" {
-		return types.Status{}, types.ErrInvalidClaim
+		return types.Status{}, types.ErrInvalidClaim(k.Codespace())
 	}
 
 	prophecy, found := k.GetProphecy(ctx, claim.ID)
@@ -96,11 +103,11 @@ func (k Keeper) ProcessClaim(ctx sdk.Context, claim types.Claim) (types.Status, 
 	case types.PendingStatusText:
 		// continue processing
 	default:
-		return types.Status{}, types.ErrProphecyFinalized
+		return types.Status{}, types.ErrProphecyFinalized(k.Codespace())
 	}
 
 	if prophecy.ValidatorClaims[claim.ValidatorAddress.String()] != "" {
-		return types.Status{}, types.ErrDuplicateMessage
+		return types.Status{}, types.ErrDuplicateMessage(k.Codespace())
 	}
 
 	prophecy.AddClaim(claim.ValidatorAddress, claim.Content)

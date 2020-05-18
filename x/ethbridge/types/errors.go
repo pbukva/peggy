@@ -7,7 +7,7 @@ import (
 
 type CodeType = sdk.CodeType
 
-var (
+const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
 	CodeInvalidEthNonce CodeType = 1
@@ -27,8 +27,8 @@ func ErrInvalidEthNonce(codespace sdk.CodespaceType) sdk.Error {
 }
 
 // ErrInvalidEthAddress implements sdk.Error.
-func ErrInvalidEthAddress(codespace sdk.CodespaceType) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidEthAddress, "invalid ethereum address provided, must be a valid hex-encoded Ethereum address")
+func ErrInvalidEthAddress(msg string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidEthAddress, fmt.Sprintf("invalid ethereum address provided, must be a valid hex-encoded Ethereum address, msg: %s", msg))
 }
 
 // ErrInvalidChainID implements sdk.Error.
