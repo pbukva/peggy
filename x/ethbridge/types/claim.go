@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/peggy/x/oracle"
 )
 
@@ -117,7 +116,7 @@ func CreateOracleClaimFromOracleString(oracleClaimString string) (OracleClaimCon
 
 	bz := []byte(oracleClaimString)
 	if err := json.Unmarshal(bz, &oracleClaimContent); err != nil {
-		return OracleClaimContent{}, sdkerrors.Wrap(ErrJSONMarshalling, fmt.Sprintf("failed to parse claim: %s", err.Error()))
+		return OracleClaimContent{}, sdk.ErrInternal(fmt.Sprintf("failed to parse claim: %s", err.Error()))
 	}
 
 	return oracleClaimContent, nil

@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/ethereum/go-ethereum/common"
-	tmKv "github.com/tendermint/tendermint/libs/kv"
+	tmCommon "github.com/tendermint/tendermint/libs/common"
 	tmLog "github.com/tendermint/tendermint/libs/log"
 	tmClient "github.com/tendermint/tendermint/rpc/client"
 	tmTypes "github.com/tendermint/tendermint/types"
@@ -42,9 +42,9 @@ func NewCosmosSub(tmProvider, ethProvider string, registryContractAddress common
 
 // Start a Cosmos chain subscription
 func (sub CosmosSub) Start() {
-	client, err := tmClient.NewHTTP(sub.TmProvider, "/websocket")
-	if err != nil {
-		sub.Logger.Error("failed to initialize a client", "err", err)
+	client := tmClient.NewHTTP(sub.TmProvider, "/websocket")
+	if client == nil {
+		sub.Logger.Error("failed to initialize a client")
 		os.Exit(1)
 	}
 	client.SetLogger(sub.Logger)
@@ -110,7 +110,7 @@ func getOracleClaimType(eventType string) types.Event {
 }
 
 // Parses event data from the msg, event, builds a new ProphecyClaim, and relays it to Ethereum
-func (sub CosmosSub) handleBurnLockMsg(attributes []tmKv.Pair, claimType types.Event) error {
+func (sub CosmosSub) handleBurnLockMsg(attributes []tmCommon.KVPair, claimType types.Event) error {
 	cosmosMsg := txs.BurnLockEventToCosmosMsg(claimType, attributes)
 	sub.Logger.Info(cosmosMsg.String())
 

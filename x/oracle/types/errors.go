@@ -1,21 +1,61 @@
 package types
 
 import (
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"fmt"
+	"github.com/Workiva/go-datastructures/threadsafe/err"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+// Local code type
+type CodeType = sdk.CodeType
 
 // Exported code type numbers
 var (
-	ErrProphecyNotFound              = sdkerrors.Register(ModuleName, 1, "prophecy with given id not found")
-	ErrMinimumConsensusNeededInvalid = sdkerrors.Register(ModuleName, 2,
-		"minimum consensus proportion of validator staking power must be > 0 and <= 1")
-	ErrNoClaims          = sdkerrors.Register(ModuleName, 3, "cannot create prophecy without initial claim")
-	ErrInvalidIdentifier = sdkerrors.Register(ModuleName, 4,
-		"invalid identifier provided, must be a nonempty string")
-	ErrProphecyFinalized = sdkerrors.Register(ModuleName, 5, "prophecy already finalized")
-	ErrDuplicateMessage  = sdkerrors.Register(ModuleName, 6,
-		"already processed message from validator for this id")
-	ErrInvalidClaim     = sdkerrors.Register(ModuleName, 7, "claim cannot be empty string")
-	ErrInvalidValidator = sdkerrors.Register(ModuleName, 8, "claim must be made by actively bonded validator")
-	ErrInternalDB       = sdkerrors.Register(ModuleName, 9, " failed prophecy serialization/deserialization")
+	DefaultCodespace sdk.CodespaceType = ModuleName
+
+	CodeProphecyNotFound              CodeType = 1
+	CodeMinimumConsensusNeededInvalid CodeType = 2
+	CodeNoClaims                      CodeType = 3
+	CodeInvalidIdentifier             CodeType = 4
+	CodeProphecyFinalized             CodeType = 5
+	CodeDuplicateMessage              CodeType = 6
+	CodeInvalidClaim                  CodeType = 7
+	CodeInvalidValidator              CodeType = 8
+	CodeInternalDB                    CodeType = 9
 )
+
+func ErrProphecyNotFound(codespace sdk.CodespaceType, id string) sdk.Error {
+	return sdk.NewError(codespace, CodeProphecyNotFound, fmt.Sprintf("prophecy with given id not found: %s", id))
+}
+
+func ErrMinimumConsensusNeededInvalid(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeMinimumConsensusNeededInvalid, "minimum consensus proportion of validator staking power must be > 0 and <= 1")
+}
+
+func ErrNoClaims(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeNoClaims, "cannot create prophecy without initial claim")
+}
+
+func ErrInvalidIdentifier(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidIdentifier, "invalid identifier provided, must be a nonempty string")
+}
+
+func ErrProphecyFinalized(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeProphecyFinalized, "prophecy already finalized")
+}
+
+func ErrDuplicateMessage(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeDuplicateMessage, "already processed message from validator for this id")
+}
+
+func ErrInvalidClaim(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidClaim, "claim cannot be empty string")
+}
+
+func ErrInvalidValidator(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidValidator, "claim must be made by actively bonded validator")
+}
+
+func ErrInternalDB(codespace sdk.CodespaceType, err error) sdk.Error {
+	return sdk.NewError(codespace, CodeInternalDB, fmt.Sprintf("internal error serializing/deserializing prophecy: %s", err.Error()))
+}
