@@ -156,6 +156,7 @@ func NewEthereumBridgeApp(
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 	app.mm = module.NewManager(
+		genaccounts.NewAppModule(app.AccountKeeper),
 		genutil.NewAppModule(app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.AccountKeeper),
 		bank.NewAppModule(app.BankKeeper, app.AccountKeeper),
@@ -170,6 +171,7 @@ func NewEthereumBridgeApp(
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(
+		genaccounts.ModuleName, distr.ModuleName,
 		auth.ModuleName, staking.ModuleName, bank.ModuleName,
 		supply.ModuleName, genutil.ModuleName, ethbridge.ModuleName,
 	)
