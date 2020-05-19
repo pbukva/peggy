@@ -1,9 +1,9 @@
 package app
 
 import (
-	"io"
 	"github.com/cosmos/peggy/x/ethbridge"
 	"github.com/cosmos/peggy/x/oracle"
+	"io"
 	"os"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -116,7 +116,7 @@ func NewEthereumBridgeApp(
 
 	keys := sdk.NewKVStoreKeys(
 		bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
-		supply.StoreKey, oracle.StoreKey, params.StoreKey,
+		supply.StoreKey, distr.StoreKey, oracle.StoreKey, params.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
 
@@ -165,11 +165,13 @@ func NewEthereumBridgeApp(
 		auth.NewAppModule(app.AccountKeeper),
 		bank.NewAppModule(app.BankKeeper, app.AccountKeeper),
 		supply.NewAppModule(app.SupplyKeeper, app.AccountKeeper),
+		distr.NewAppModule(app.DistrKeeper, app.SupplyKeeper),
 		staking.NewAppModule(app.StakingKeeper, app.DistrKeeper, app.AccountKeeper, app.SupplyKeeper),
 		oracle.NewAppModule(app.OracleKeeper),
 		ethbridge.NewAppModule(app.OracleKeeper, app.SupplyKeeper, app.AccountKeeper, app.BridgeKeeper, ethbridge.DefaultCodespace, app.cdc),
 	)
 
+	app.mm.SetOrderBeginBlockers(distr.ModuleName)
 	app.mm.SetOrderEndBlockers(staking.ModuleName)
 
 	// NOTE: The genutils module must occur after staking so that pools are
