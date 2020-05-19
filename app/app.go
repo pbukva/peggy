@@ -1,6 +1,7 @@
 package app
 
 import (
+	"io"
 	"github.com/cosmos/peggy/x/ethbridge"
 	"github.com/cosmos/peggy/x/oracle"
 	"os"
@@ -26,14 +27,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 )
 
-const appName = "GaiaApp"
+const (
+	appName = "EthereumBridge"
+)
 
 var (
-	// default home directories for gaiacli
-	DefaultCLIHome = os.ExpandEnv("$HOME/.gaiacli")
+	// DefaultCLIHome default home directories for ebcli
+	DefaultCLIHome = os.ExpandEnv("$HOME/.ebcli")
 
-	// default home directories for gaiad
-	DefaultNodeHome = os.ExpandEnv("$HOME/.gaiad")
+	// DefaultNodeHome sets the folder where the application data and configuration will be stored
+	DefaultNodeHome = os.ExpandEnv("$HOME/.ebd")
 
 	// The module BasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
@@ -66,9 +69,9 @@ func MakeCodec() *codec.Codec {
 	var cdc = codec.New()
 
 	ModuleBasics.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	codec.RegisterEvidences(cdc)
 	return cdc
 }
 
@@ -100,7 +103,7 @@ type EthereumBridgeApp struct {
 
 // NewEthereumBridgeApp is a constructor function for EthereumBridgeApp
 func NewEthereumBridgeApp(
-	logger log.Logger, db dbm.DB, loadLatest bool,
+	logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
 	baseAppOptions ...func(*bam.BaseApp),
 ) *EthereumBridgeApp {
 	// First define the top level codec that will be shared by the different modules
@@ -108,6 +111,7 @@ func NewEthereumBridgeApp(
 
 	// BaseApp handles interactions with Tendermint through the ABCI protocol
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
+	bApp.SetCommitMultiStoreTracer(traceStore)
 	bApp.SetAppVersion(version.Version)
 
 	keys := sdk.NewKVStoreKeys(
@@ -143,7 +147,7 @@ func NewEthereumBridgeApp(
 	   app.SupplyKeeper, distr.DefaultCodespace, auth.FeeCollectorName, app.ModuleAccountAddrs(),
 	   )
 	app.OracleKeeper = oracle.NewKeeper(app.cdc, keys[oracle.StoreKey],
-	   app.StakingKeeper, oracle.DefaultCodespace, oracle.DefaultConsensusNeeded,
+	   &stakingKeeper, oracle.DefaultCodespace, oracle.DefaultConsensusNeeded,
 	   )
 	app.BridgeKeeper = ethbridge.NewKeeper(app.cdc, app.SupplyKeeper, app.OracleKeeper, ethbridge.DefaultCodespace)
 
@@ -171,8 +175,7 @@ func NewEthereumBridgeApp(
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(
-		genaccounts.ModuleName, distr.ModuleName,
-		auth.ModuleName, staking.ModuleName, bank.ModuleName,
+		auth.ModuleName, genaccounts.ModuleName, distr.ModuleName, staking.ModuleName, bank.ModuleName,
 		supply.ModuleName, genutil.ModuleName, ethbridge.ModuleName,
 	)
 

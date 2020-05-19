@@ -46,6 +46,7 @@ func main() {
 
 	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome))
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
+	rootCmd.AddCommand(genutilcli.MigrateGenesisCmd(ctx, cdc))
 	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
 		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
@@ -61,7 +62,7 @@ func main() {
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewEthereumBridgeApp(
-		logger, db, true,
+		logger, db, traceStore, true,
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
 		baseapp.SetHaltHeight(uint64(viper.GetInt(server.FlagHaltHeight))),
 	)
@@ -72,12 +73,12 @@ func exportAppStateAndTMValidators(
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 
 	if height != -1 {
-		ebApp := app.NewEthereumBridgeApp(logger, db, false)
+		ebApp := app.NewEthereumBridgeApp(logger, db, traceStore, false)
 		if err := ebApp.LoadHeight(height); err != nil {
 			return nil, nil, err
 		}
 		return ebApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-	ebApp := app.NewEthereumBridgeApp(logger, db, true)
+	ebApp := app.NewEthereumBridgeApp(logger, db, traceStore, true)
 	return ebApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }
