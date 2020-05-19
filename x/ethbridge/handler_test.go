@@ -90,7 +90,7 @@ func TestDuplicateMsgs(t *testing.T) {
 
 	//Duplicate message from same validator
 	res = handler(ctx, normalCreateMsg)
-	//require.False(t, res.IsOK())
+	require.False(t, res.IsOK())
 	require.True(t, strings.Contains(res.Log, "already processed message from validator for this id"))
 }
 

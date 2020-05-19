@@ -39,11 +39,11 @@ func handleMsgCreateEthBridgeClaim(
 ) sdk.Result {
 	status, err := bridgeKeeper.ProcessClaim(ctx, types.EthBridgeClaim(msg))
 	if err != nil {
-		return sdk.Result{}
+		return err.Result()
 	}
 	if status.Text == oracle.SuccessStatusText {
 		if err = bridgeKeeper.ProcessSuccessfulClaim(ctx, status.FinalClaim); err != nil {
-			return sdk.Result{}
+			return err.Result()
 		}
 	}
 
@@ -83,7 +83,7 @@ func handleMsgBurn(
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin(msg.Symbol, msg.Amount))
 	if err := bridgeKeeper.ProcessBurn(ctx, msg.CosmosSender, coins); err != nil {
-		return sdk.Result{}
+		return err.Result()
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -118,7 +118,7 @@ func handleMsgLock(
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin(msg.Symbol, msg.Amount))
 	if err := bridgeKeeper.ProcessLock(ctx, msg.CosmosSender, coins); err != nil {
-		return sdk.Result{}
+		return err.Result()
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
