@@ -14,7 +14,7 @@ contract EthereumBank {
 
     uint256 public lockBurnNonce;
     mapping(address => uint256) public lockedFunds;
-    mapping(string => address) public lockedTokenList;
+    mapping(string => address) private lockedTokenList;
 
     /*
      * @dev: Event declarations

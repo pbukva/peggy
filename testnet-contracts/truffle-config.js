@@ -6,7 +6,7 @@ module.exports = {
   // contracts_directory: "./flat",
   networks: {
     develop: {
-      host: "localhost",
+      host: "127.0.0.1",
       port: 7545, // Match default network 'ganache'
       network_id: 5777,
       gas: 6721975, // Truffle default development block gas limit

@@ -189,7 +189,7 @@ contract BridgeBank is CosmosBank, EthereumBank {
         );
 
         // Confirm that the bank holds sufficient balances to complete the unlock
-        address tokenAddress = lockedTokenList[_symbol];
+        address tokenAddress = getLockedTokenAddress(_symbol);
         if (tokenAddress == address(0)) {
             require(
                 address(this).balance >= _amount,
