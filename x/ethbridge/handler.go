@@ -10,14 +10,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // NewHandler returns a handler for "ethbridge" type messages.
 func NewHandler(
 	accountKeeper types.AccountKeeper, bridgeKeeper Keeper,
 	cdc *codec.Codec) sdk.Handler {
-	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
+	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case MsgCreateEthBridgeClaim:
@@ -28,7 +27,7 @@ func NewHandler(
 			return handleMsgLock(ctx, cdc, accountKeeper, bridgeKeeper, msg)
 		default:
 			errMsg := fmt.Sprintf("unrecognized ethbridge message type: %v", msg.Type())
-			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+			return sdk.ErrUnknownRequest(errMsg).Result();
 		}
 	}
 }
@@ -36,14 +35,14 @@ func NewHandler(
 // Handle a message to create a bridge claim
 func handleMsgCreateEthBridgeClaim(
 	ctx sdk.Context, cdc *codec.Codec, bridgeKeeper Keeper, msg MsgCreateEthBridgeClaim,
-) (*sdk.Result, error) {
+) sdk.Result {
 	status, err := bridgeKeeper.ProcessClaim(ctx, types.EthBridgeClaim(msg))
 	if err != nil {
-		return nil, err
+		return err.Result()
 	}
 	if status.Text == oracle.SuccessStatusText {
 		if err = bridgeKeeper.ProcessSuccessfulClaim(ctx, status.FinalClaim); err != nil {
-			return nil, err
+			return err.Result()
 		}
 	}
 
@@ -68,22 +67,22 @@ func handleMsgCreateEthBridgeClaim(
 		),
 	})
 
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
+	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
 func handleMsgBurn(
 	ctx sdk.Context, cdc *codec.Codec, accountKeeper types.AccountKeeper,
 	bridgeKeeper Keeper, msg MsgBurn,
-) (*sdk.Result, error) {
+) sdk.Result {
 
 	account := accountKeeper.GetAccount(ctx, msg.CosmosSender)
 	if account == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.CosmosSender.String())
+		return sdk.ErrInvalidAddress(msg.CosmosSender.String()).Result()
 	}
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin(msg.Symbol, msg.Amount))
 	if err := bridgeKeeper.ProcessBurn(ctx, msg.CosmosSender, coins); err != nil {
-		return nil, err
+		return err.Result()
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -103,23 +102,22 @@ func handleMsgBurn(
 		),
 	})
 
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
-
+	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
 func handleMsgLock(
 	ctx sdk.Context, cdc *codec.Codec, accountKeeper types.AccountKeeper,
 	bridgeKeeper Keeper, msg MsgLock,
-) (*sdk.Result, error) {
+) sdk.Result {
 
 	account := accountKeeper.GetAccount(ctx, msg.CosmosSender)
 	if account == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.CosmosSender.String())
+		return sdk.ErrInvalidAddress(msg.CosmosSender.String()).Result()
 	}
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin(msg.Symbol, msg.Amount))
 	if err := bridgeKeeper.ProcessLock(ctx, msg.CosmosSender, coins); err != nil {
-		return nil, err
+		return err.Result()
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -139,6 +137,5 @@ func handleMsgLock(
 		),
 	})
 
-	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
-
+	return sdk.Result{Events: ctx.EventManager().Events()}
 }

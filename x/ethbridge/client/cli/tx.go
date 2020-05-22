@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bufio"
 	"regexp"
 	"strconv"
 
@@ -29,8 +28,7 @@ func GetCmdCreateEthBridgeClaim(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := authtypes.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			ethereumChainIDString := viper.GetString(types.FlagEthereumChainID)
 			ethereumChainID, err := strconv.Atoi(ethereumChainIDString)
@@ -71,14 +69,14 @@ func GetCmdCreateEthBridgeClaim(cdc *codec.Codec) *cobra.Command {
 
 			var digitCheck = regexp.MustCompile(`^[0-9]+$`)
 			if !digitCheck.MatchString(args[6]) {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 			amount, err := strconv.ParseInt(args[6], 10, 64)
 			if err != nil {
 				return err
 			}
 			if amount <= 0 {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 
 			claimType, err := types.StringToClaimType(args[7])
@@ -111,8 +109,7 @@ func GetCmdBurn(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := authtypes.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			ethereumChainIDString := viper.GetString(types.FlagEthereumChainID)
 			ethereumChainID, err := strconv.Atoi(ethereumChainIDString)
@@ -132,14 +129,14 @@ func GetCmdBurn(cdc *codec.Codec) *cobra.Command {
 
 			var digitCheck = regexp.MustCompile(`^[0-9]+$`)
 			if !digitCheck.MatchString(args[2]) {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 			amount, err := strconv.ParseInt(args[2], 10, 64)
 			if err != nil {
 				return err
 			}
 			if amount <= 0 {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 
 			symbol := args[3]
@@ -164,8 +161,7 @@ func GetCmdLock(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := authtypes.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			ethereumChainIDString := viper.GetString(types.FlagEthereumChainID)
 			ethereumChainID, err := strconv.Atoi(ethereumChainIDString)
@@ -185,14 +181,14 @@ func GetCmdLock(cdc *codec.Codec) *cobra.Command {
 
 			var digitCheck = regexp.MustCompile(`^[0-9]+$`)
 			if !digitCheck.MatchString(args[2]) {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 			amount, err := strconv.ParseInt(args[2], 10, 64)
 			if err != nil {
 				return err
 			}
 			if amount <= 0 {
-				return types.ErrInvalidAmount
+				return types.ErrInvalidAmount()
 			}
 
 			symbol := args[3]

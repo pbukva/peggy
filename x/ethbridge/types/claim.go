@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/peggy/x/oracle"
 )
 
@@ -89,7 +88,7 @@ func CreateOracleClaimFromEthClaim(cdc *codec.Codec, ethClaim EthBridgeClaim) (o
 func CreateEthClaimFromOracleString(
 	ethereumChainID int, bridgeContract EthereumAddress, nonce int,
 	ethereumAddress EthereumAddress, validator sdk.ValAddress, oracleClaimString string,
-) (EthBridgeClaim, error) {
+) (EthBridgeClaim, sdk.Error) {
 	oracleClaim, err := CreateOracleClaimFromOracleString(oracleClaimString)
 	if err != nil {
 		return EthBridgeClaim{}, err
@@ -112,12 +111,12 @@ func CreateEthClaimFromOracleString(
 // CreateOracleClaimFromOracleString converts a JSON string into an OracleClaimContent struct used by this module.
 // In general, it is expected that the oracle module will store claims in this JSON format
 // and so this should be used to convert oracle claims.
-func CreateOracleClaimFromOracleString(oracleClaimString string) (OracleClaimContent, error) {
+func CreateOracleClaimFromOracleString(oracleClaimString string) (OracleClaimContent, sdk.Error) {
 	var oracleClaimContent OracleClaimContent
 
 	bz := []byte(oracleClaimString)
 	if err := json.Unmarshal(bz, &oracleClaimContent); err != nil {
-		return OracleClaimContent{}, sdkerrors.Wrap(ErrJSONMarshalling, fmt.Sprintf("failed to parse claim: %s", err.Error()))
+		return OracleClaimContent{}, sdk.ErrInternal(fmt.Sprintf("failed to parse claim: %s", err.Error()))
 	}
 
 	return oracleClaimContent, nil

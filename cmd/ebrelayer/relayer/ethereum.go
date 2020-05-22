@@ -57,7 +57,7 @@ func NewEthereumSub(inBuf io.Reader, rpcURL string, cdc *codec.Codec, validatorM
 
 	// Load CLI context and Tx builder
 	cliCtx := LoadTendermintCLIContext(cdc, validatorAddress, validatorName, rpcURL, chainID)
-	txBldr := authtypes.NewTxBuilderFromCLI(nil).
+	txBldr := authtypes.NewTxBuilderFromCLI().
 		WithTxEncoder(utils.GetTxEncoder(cdc)).
 		WithChainID(chainID)
 
@@ -77,7 +77,7 @@ func NewEthereumSub(inBuf io.Reader, rpcURL string, cdc *codec.Codec, validatorM
 // LoadValidatorCredentials : loads validator's credentials (address, moniker, and passphrase)
 func LoadValidatorCredentials(validatorFrom string, inBuf io.Reader) (sdk.ValAddress, string, error) {
 	// Get the validator's name and account address using their moniker
-	validatorAccAddress, validatorName, err := sdkContext.GetFromFields(inBuf, validatorFrom, false)
+	validatorAccAddress, validatorName, err := sdkContext.GetFromFields(validatorFrom, false)
 	if err != nil {
 		return sdk.ValAddress{}, "", err
 	}
@@ -136,13 +136,13 @@ func (sub EthereumSub) Start() {
 	// Start BridgeBank subscription, prepare contract ABI and LockLog event signature
 	bridgeBankAddress, subBridgeBank := sub.startContractEventSub(logs, client, txs.BridgeBank)
 	bridgeBankContractABI := contract.LoadABI(txs.BridgeBank)
-	eventLogLockSignature := bridgeBankContractABI.Events[types.LogLock.String()].Id().Hex()
-	eventLogBurnSignature := bridgeBankContractABI.Events[types.LogBurn.String()].Id().Hex()
+	eventLogLockSignature := bridgeBankContractABI.Events[types.LogLock.String()].ID().Hex()
+	eventLogBurnSignature := bridgeBankContractABI.Events[types.LogBurn.String()].ID().Hex()
 
 	// Start CosmosBridge subscription, prepare contract ABI and LogNewProphecyClaim event signature
 	cosmosBridgeAddress, subCosmosBridge := sub.startContractEventSub(logs, client, txs.CosmosBridge)
 	cosmosBridgeContractABI := contract.LoadABI(txs.CosmosBridge)
-	eventLogNewProphecyClaimSignature := cosmosBridgeContractABI.Events[types.LogNewProphecyClaim.String()].Id().Hex()
+	eventLogNewProphecyClaimSignature := cosmosBridgeContractABI.Events[types.LogNewProphecyClaim.String()].ID().Hex()
 
 	for {
 		select {

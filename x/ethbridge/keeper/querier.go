@@ -1,14 +1,12 @@
 package keeper
 
 import (
-	"fmt"
 	"strconv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/cosmos/peggy/x/ethbridge/types"
 	oracletypes "github.com/cosmos/peggy/x/oracle/types"
@@ -17,30 +15,29 @@ import (
 // TODO: move to x/oracle
 
 // NewQuerier is the module level router for state queries
-func NewQuerier(keeper types.OracleKeeper, cdc *codec.Codec) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
+func NewQuerier(keeper types.OracleKeeper, cdc *codec.Codec, codespace sdk.CodespaceType) sdk.Querier {
+	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case types.QueryEthProphecy:
-			return queryEthProphecy(ctx, cdc, req, keeper)
+			return queryEthProphecy(ctx, cdc, req, keeper, codespace)
 		default:
-			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown ethbridge query endpoint")
+			return nil, sdk.ErrUnknownRequest("unknown ethbridge query endpoint")
 		}
 	}
 }
 
 func queryEthProphecy(
-	ctx sdk.Context, cdc *codec.Codec, req abci.RequestQuery, keeper types.OracleKeeper,
-) ([]byte, error) {
+	ctx sdk.Context, cdc *codec.Codec, req abci.RequestQuery, keeper types.OracleKeeper, codespace sdk.CodespaceType) ([]byte, sdk.Error) {
 	var params types.QueryEthProphecyParams
 
 	if err := cdc.UnmarshalJSON(req.Data, &params); err != nil {
-		return nil, sdkerrors.Wrap(types.ErrJSONMarshalling, fmt.Sprintf("failed to parse params: %s", err.Error()))
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to parse params: %s", err.Error()))
 	}
 
 	id := strconv.Itoa(params.EthereumChainID) + strconv.Itoa(params.Nonce) + params.EthereumSender.String()
 	prophecy, found := keeper.GetProphecy(ctx, id)
 	if !found {
-		return nil, sdkerrors.Wrap(oracletypes.ErrProphecyNotFound, id)
+		return nil, oracletypes.ErrProphecyNotFound(codespace, id)
 	}
 
 	bridgeClaims, err := types.MapOracleClaimsToEthBridgeClaims(
@@ -51,6 +48,10 @@ func queryEthProphecy(
 	}
 
 	response := types.NewQueryEthProphecyResponse(prophecy.ID, prophecy.Status, bridgeClaims)
+	data, err2 := cdc.MarshalJSONIndent(response, "", "  ")
+	if (err2 != nil) {
+		return data, sdk.ErrInternal(sdk.AppendMsgToErr("JSON dentation failed for received Eth Prohpesy Response: %s", err.Error()))
+	}
 
-	return cdc.MarshalJSONIndent(response, "", "  ")
+	return data, nil
 }

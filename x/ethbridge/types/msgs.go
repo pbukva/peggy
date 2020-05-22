@@ -9,7 +9,6 @@ import (
 	gethCommon "github.com/ethereum/go-ethereum/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // MsgLock defines a message for locking coins and triggering a related event
@@ -41,29 +40,30 @@ func (msg MsgLock) Route() string { return RouterKey }
 func (msg MsgLock) Type() string { return "lock" }
 
 // ValidateBasic runs stateless checks on the message
-func (msg MsgLock) ValidateBasic() error {
+func (msg MsgLock) ValidateBasic() sdk.Error {
+	//TODO(pb): Does this check make sense at all?
 	if strconv.Itoa(msg.EthereumChainID) == "" {
-		return sdkerrors.Wrapf(ErrInvalidEthereumChainID, "%d", msg.EthereumChainID)
+		return ErrInvalidEthereumChainID(DefaultCodespace, strconv.Itoa(msg.EthereumChainID))
 	}
 
 	if msg.CosmosSender.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.CosmosSender.String())
+		return sdk.ErrInvalidAddress("Empty cosmos sender address string")
 	}
 
 	if msg.EthereumReceiver.String() == "" {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress("Empty ethereum receiver address string")
 	}
 
 	if !gethCommon.IsHexAddress(msg.EthereumReceiver.String()) {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress(fmt.Sprintf("Ethereum receiver: %s", msg.EthereumReceiver.String()))
 	}
 
 	if msg.Amount <= 0 {
-		return ErrInvalidAmount
+		return ErrInvalidAmount()
 	}
 
 	if len(msg.Symbol) == 0 {
-		return ErrInvalidSymbol
+		return ErrInvalidSymbol()
 	}
 
 	return nil
@@ -113,33 +113,37 @@ func (msg MsgBurn) Route() string { return RouterKey }
 func (msg MsgBurn) Type() string { return "burn" }
 
 // ValidateBasic runs stateless checks on the message
-func (msg MsgBurn) ValidateBasic() error {
+func (msg MsgBurn) ValidateBasic() sdk.Error {
+	//TODO(pb): Does this check make sense at all?
 	if strconv.Itoa(msg.EthereumChainID) == "" {
-		return sdkerrors.Wrapf(ErrInvalidEthereumChainID, "%d", msg.EthereumChainID)
+		return ErrInvalidEthereumChainID(DefaultCodespace, strconv.Itoa(msg.EthereumChainID))
 	}
+
 	if msg.CosmosSender.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.CosmosSender.String())
+		return sdk.ErrInvalidAddress("Empty cosmos sender address string")
 	}
+
 	if msg.EthereumReceiver.String() == "" {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress("Empty ethereum receiver address string")
 	}
+
 	if !gethCommon.IsHexAddress(msg.EthereumReceiver.String()) {
-		return ErrInvalidEthAddress
-	}
+		return ErrInvalidEthAddress(fmt.Sprintf("Ethereum receiver: %s", msg.EthereumReceiver.String()))	}
+
 	if msg.Amount <= 0 {
-		return ErrInvalidAmount
+		return ErrInvalidAmount()
 	}
 	prefixLength := len(PeggedCoinPrefix)
 	if len(msg.Symbol) <= prefixLength+1 {
-		return ErrInvalidBurnSymbol
+		return ErrInvalidBurnSymbol()
 	}
 	symbolPrefix := msg.Symbol[:prefixLength]
 	if symbolPrefix != PeggedCoinPrefix {
-		return ErrInvalidBurnSymbol
+		return ErrInvalidBurnSymbol()
 	}
 	symbolSuffix := msg.Symbol[prefixLength:]
 	if len(symbolSuffix) == 0 {
-		return ErrInvalidBurnSymbol
+		return ErrInvalidBurnSymbol()
 	}
 	return nil
 }
@@ -174,31 +178,31 @@ func (msg MsgCreateEthBridgeClaim) Route() string { return RouterKey }
 func (msg MsgCreateEthBridgeClaim) Type() string { return "create_bridge_claim" }
 
 // ValidateBasic runs stateless checks on the message
-func (msg MsgCreateEthBridgeClaim) ValidateBasic() error {
+func (msg MsgCreateEthBridgeClaim) ValidateBasic() sdk.Error {
 	if msg.CosmosReceiver.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.CosmosReceiver.String())
+		return sdk.ErrInvalidAddress("Empty cosmos receiver address string")
 	}
 
 	if msg.ValidatorAddress.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.ValidatorAddress.String())
+		return sdk.ErrInvalidAddress("Empty cosmos validator address string")
 	}
 
 	if msg.Nonce < 0 {
-		return ErrInvalidEthNonce
+		return ErrInvalidEthNonce(DefaultCodespace)
 	}
 
 	if !gethCommon.IsHexAddress(msg.EthereumSender.String()) {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress(fmt.Sprintf("Ethereum sender address: %s", msg.EthereumSender.String()))
 	}
 	if !gethCommon.IsHexAddress(msg.BridgeContractAddress.String()) {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress(fmt.Sprintf("Ethereum Bridge Contract address: %s", msg.BridgeContractAddress.String()))
 	}
 	if !gethCommon.IsHexAddress(msg.TokenContractAddress.String()) {
-		return ErrInvalidEthAddress
+		return ErrInvalidEthAddress(fmt.Sprintf("Ethereum Token Contract address: %s", msg.TokenContractAddress.String()))
 	}
 	if strings.ToLower(msg.Symbol) == "eth" &&
 		msg.TokenContractAddress != NewEthereumAddress("0x0000000000000000000000000000000000000000") {
-		return ErrInvalidEthSymbol
+		return ErrInvalidEthSymbol(DefaultCodespace)
 	}
 	return nil
 }
@@ -223,14 +227,14 @@ func MapOracleClaimsToEthBridgeClaims(
 	tokenContract EthereumAddress, ethereumSender EthereumAddress,
 	oracleValidatorClaims map[string]string,
 	f func(int, EthereumAddress, int, EthereumAddress, sdk.ValAddress, string,
-	) (EthBridgeClaim, error),
-) ([]EthBridgeClaim, error) {
+	) (EthBridgeClaim, sdk.Error),
+) ([]EthBridgeClaim, sdk.Error) {
 	mappedClaims := make([]EthBridgeClaim, len(oracleValidatorClaims))
 	i := 0
 	for validatorBech32, validatorClaim := range oracleValidatorClaims {
 		validatorAddress, parseErr := sdk.ValAddressFromBech32(validatorBech32)
 		if parseErr != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, fmt.Sprintf("failed to parse claim: %s", parseErr))
+			return nil, sdk.ErrInvalidAddress(fmt.Sprintf("failed to parse claim: %s", parseErr))
 		}
 		mappedClaim, err := f(
 			ethereumChainID, bridgeContract, nonce, ethereumSender, validatorAddress, validatorClaim)

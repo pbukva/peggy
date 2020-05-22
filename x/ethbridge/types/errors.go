@@ -2,21 +2,65 @@ package types
 
 import (
 	"fmt"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var (
-	ErrInvalidEthNonce   = sdkerrors.Register(ModuleName, 1, "invalid ethereum nonce provided, must be >= 0")
-	ErrInvalidEthAddress = sdkerrors.Register(ModuleName, 2,
-		"invalid ethereum address provided, must be a valid hex-encoded Ethereum address")
-	ErrJSONMarshalling  = sdkerrors.Register(ModuleName, 3, "error marshalling JSON for this claim")
-	ErrInvalidEthSymbol = sdkerrors.Register(ModuleName, 4,
-		"invalid symbol provided, symbol 'eth' must have null address set as token contract address")
-	ErrInvalidClaimType       = sdkerrors.Register(ModuleName, 5, "invalid claim type provided")
-	ErrInvalidEthereumChainID = sdkerrors.Register(ModuleName, 6, "invalid ethereum chain id")
-	ErrInvalidAmount          = sdkerrors.Register(ModuleName, 7, "amount must be a valid integer > 0")
-	ErrInvalidSymbol          = sdkerrors.Register(ModuleName, 8, "symbol must be 1 character or more")
-	ErrInvalidBurnSymbol      = sdkerrors.Register(ModuleName, 9,
-		fmt.Sprintf("symbol of token to burn must be in the form %v{ethereumSymbol}", PeggedCoinPrefix))
+type CodeType = sdk.CodeType
+
+const (
+	DefaultCodespace           sdk.CodespaceType = ModuleName
+	CodeInvalidEthNonce        CodeType = 1
+	CodeInvalidEthAddress      CodeType = 2
+	CodeJSONMarshalling        CodeType = 3
+	CodeInvalidEthSymbol       CodeType = 4
+	CodeInvalidClaimType       CodeType = 5
+	CodeInvalidEthereumChainID CodeType = 6
+	CodeInvalidAmount          CodeType = 7
+	CodeInvalidSymbol          CodeType = 8
+	CodeInvalidBurnSymbol      CodeType = 9
 )
+
+// ErrInvalidEthNonce implements sdk.Error.
+func ErrInvalidEthNonce(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidEthNonce, "invalid ethereum nonce provided, must be >= 0")
+}
+
+// ErrInvalidEthAddress implements sdk.Error.
+func ErrInvalidEthAddress(msg string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidEthAddress, fmt.Sprintf("invalid ethereum address provided, must be a valid hex-encoded Ethereum address, msg: %s", msg))
+}
+
+// ErrInvalidChainID implements sdk.Error.
+func ErrInvalidEthereumChainID(codespace sdk.CodespaceType, chainID string) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidEthereumChainID, fmt.Sprintf("invalid ethereum chain id '%s'", chainID))
+}
+
+// ErrJSONMarshalling implements sdk.Error.
+func ErrJSONMarshalling(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeJSONMarshalling, "error marshalling JSON for this claim")
+}
+
+// ErrInvalidEthSymbol implements sdk.Error.
+func ErrInvalidEthSymbol(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidEthSymbol, "invalid symbol provided, symbol \"eth\" must have null address set as token contract address")
+}
+
+// ErrInvalidClaimType implements sdk.Error.
+func ErrInvalidClaimType() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidClaimType, "invalid claim type provided")
+}
+
+// ErrInvalidAmount implements sdk.Error.
+func ErrInvalidAmount() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidAmount, "amount must be a valid integer > 0")
+}
+
+// ErrInvalidSymbol implements sdk.Error.
+func ErrInvalidSymbol() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidSymbol, "symbol must be 1 character or more")
+}
+
+// ErrInvalidBurnSymbol implements sdk.Error.
+func ErrInvalidBurnSymbol() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidBurnSymbol, fmt.Sprintf("symbol of token to burn must be in the form %v{ethereumSymbol}", PeggedCoinPrefix))
+}

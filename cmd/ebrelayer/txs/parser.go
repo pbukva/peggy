@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	tmKv "github.com/tendermint/tendermint/libs/kv"
+	tmCommon "github.com/tendermint/tendermint/libs/common"
 
 	"github.com/cosmos/peggy/cmd/ebrelayer/types"
 	ethbridge "github.com/cosmos/peggy/x/ethbridge/types"
@@ -124,7 +124,7 @@ func CosmosMsgToProphecyClaim(event types.CosmosMsg) ProphecyClaim {
 }
 
 // BurnLockEventToCosmosMsg parses data from a Burn/Lock event witnessed on Cosmos into a CosmosMsg struct
-func BurnLockEventToCosmosMsg(claimType types.Event, attributes []tmKv.Pair) types.CosmosMsg {
+func BurnLockEventToCosmosMsg(claimType types.Event, attributes []tmCommon.KVPair) types.CosmosMsg {
 	var cosmosSender []byte
 	var ethereumReceiver common.Address
 	var symbol string

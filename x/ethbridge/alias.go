@@ -13,6 +13,7 @@ import (
 
 const (
 	QueryEthProphecy = types.QueryEthProphecy
+	DefaultCodespace = types.DefaultCodespace
 	ModuleName       = types.ModuleName
 	StoreKey         = types.StoreKey
 	QuerierRoute     = types.QuerierRoute

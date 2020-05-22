@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	DefaultCodespace       = types.DefaultCodespace
 	DefaultConsensusNeeded = types.DefaultConsensusNeeded
 	ModuleName             = types.ModuleName
 	StoreKey               = types.StoreKey

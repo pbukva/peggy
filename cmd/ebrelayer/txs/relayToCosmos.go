@@ -25,25 +25,25 @@ func RelayToCosmos(cdc *codec.Codec, moniker string, claim *types.EthBridgeClaim
 	}
 
 	// Prepare tx
-	txBldr, err = utils.PrepareTxBuilder(txBldr, cliCtx)
-	if err != nil {
-		return err
+	txBldr, err2 := utils.PrepareTxBuilder(txBldr, cliCtx)
+	if err2 != nil {
+		return err2
 	}
 
 	// Build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(moniker, keys.DefaultKeyPass, []sdk.Msg{msg})
-	if err != nil {
-		return err
+	txBytes, err2 := txBldr.BuildAndSign(moniker, keys.DefaultKeyPass, []sdk.Msg{msg})
+	if err2 != nil {
+		return err2
 	}
 
 	// Broadcast to a Tendermint node
-	res, err := cliCtx.BroadcastTxSync(txBytes)
-	if err != nil {
-		return err
+	res, err2 := cliCtx.BroadcastTxSync(txBytes)
+	if err2 != nil {
+		return err2
 	}
 
-	if err = cliCtx.PrintOutput(res); err != nil {
-		return err
+	if err2 = cliCtx.PrintOutput(res); err2 != nil {
+		return err2
 	}
 	return nil
 }
