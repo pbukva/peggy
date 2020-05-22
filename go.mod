@@ -34,6 +34,6 @@ require (
 )
 
 replace (
-	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.0.0-20200422231629-ebffc60f3163
-	github.com/tendermint/tendermint => github.com/tendermint/tendermint v0.0.0-20200429152527-d85e2e52d257
+	github.com/cosmos/cosmos-sdk => github.com/fetchai/cosmos-sdk v0.3.0
+	github.com/tendermint/tendermint => github.com/fetchai/cosmos-consensus v0.3.0
 )
