@@ -110,10 +110,10 @@ github.com/facebookgo/stack v0.0.0-20160209184415-751773369052/go.mod h1:UbMTZqL
 github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 h1:E2s37DuLxFhQDg5gKsWoLBOB0n+ZW8s599zru8FJ2/Y=
 github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870/go.mod h1:5tD+neXqOorC30/tWg0LCSkrqj/AR6gu8yY8/fpw1q0=
 github.com/fatih/color v1.3.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/fetchai/cosmos-consensus v0.3.0 h1:qbUMSYRp5Iqn2CKAhUo29AVhIODPWBNuEUI86SFaSNI=
-github.com/fetchai/cosmos-consensus v0.3.0/go.mod h1:oK9suVfu/cwKb1U0Urcjnl/zI1/CAsGjhAbYDCOqhDQ=
-github.com/fetchai/cosmos-sdk v0.3.0 h1:QamdthZ3Y63VVYuXOwzHnFRhEp4FhmRbp9WQag3PSxk=
-github.com/fetchai/cosmos-sdk v0.3.0/go.mod h1:6xdt0CsYcGC4UtinxrOdNwN0Yf7eCkKmLc92zyoU9Cw=
+github.com/fetchai/cosmos-consensus v0.4.0 h1:cF/b6q8LDWjmXrmk8uMDKfmZJYVuT0B4ANZ9tyqJL4Y=
+github.com/fetchai/cosmos-consensus v0.4.0/go.mod h1:oK9suVfu/cwKb1U0Urcjnl/zI1/CAsGjhAbYDCOqhDQ=
+github.com/fetchai/cosmos-sdk v0.4.0 h1:3NclWmgODbGDcDwMwgYwSzjeFQFMMUJWaTEQnRZ4LxU=
+github.com/fetchai/cosmos-sdk v0.4.0/go.mod h1:PId8btxwfAXBSV1lboro+RRaTmCimaHBURHt+qiYnvs=
 github.com/fjl/memsize v0.0.0-20180418122429-ca190fb6ffbc/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5 h1:FtmdgXiUlNeRsoNMFlKLDt+S+6hbjVMEW6RGQ7aUf7c=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
