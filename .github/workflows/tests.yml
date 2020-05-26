@@ -1,9 +1,14 @@
 name: test coverage
 on:
   pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
+
+env:
+  GOPRIVATE: "github.com/fetchai/*"
 
 jobs:
   cleanup-runs:
@@ -19,13 +24,19 @@ jobs:
     steps:
       - uses: actions/setup-go@v2-beta
       - uses: actions/checkout@v2
+      - name: Set up ssh keys
+        uses: webfactory/ssh-agent@v0.2.0
+        with:
+          ssh-private-key: ${{ secrets.FETCH_BOT_SSH_KEY }}
+      - name: Build Dependencies
+        run: |
+          git config --global url."git@github.com:".insteadOf https://github.com/          
+          sudo apt-get install -y curl wget jq file make libgmp-dev swig libboost-serialization-dev
+          git clone https://github.com/herumi/mcl /tmp/mcl && pushd /tmp/mcl && sudo make install PREFIX=/usr && popd
+
       - name: build
         run: |
           make build
       - name: test & coverage report creation
         run: |
           go test ./... -mod=readonly -timeout 12m -race -coverprofile=coverage.txt -covermode=atomic
-      - uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.txt # optional
-          fail_ci_if_error: true

@@ -1,5 +1,9 @@
 name: Lint
 on: [pull_request]
+
+env:
+  GOPRIVATE: "github.com/fetchai/*"
+
 jobs:
   golangci-lint:
     runs-on: ubuntu-latest
