@@ -8,17 +8,16 @@ import (
 type CodeType = sdk.CodeType
 
 const (
-	DefaultCodespace sdk.CodespaceType = ModuleName
-
-	CodeInvalidEthNonce CodeType = 1
-	CodeInvalidEthAddress CodeType = 2
-	CodeJSONMarshalling CodeType = 3
-	CodeInvalidEthSymbol CodeType = 4
-	CodeInvalidClaimType      CodeType = 5
+	DefaultCodespace           sdk.CodespaceType = ModuleName
+	CodeInvalidEthNonce        CodeType = 1
+	CodeInvalidEthAddress      CodeType = 2
+	CodeJSONMarshalling        CodeType = 3
+	CodeInvalidEthSymbol       CodeType = 4
+	CodeInvalidClaimType       CodeType = 5
 	CodeInvalidEthereumChainID CodeType = 6
-	CodeInvalidAmount         CodeType = 7
-	CodeInvalidSymbol         CodeType = 8
-	CodeInvalidBurnSymbol     CodeType = 9
+	CodeInvalidAmount          CodeType = 7
+	CodeInvalidSymbol          CodeType = 8
+	CodeInvalidBurnSymbol      CodeType = 9
 )
 
 // ErrInvalidEthNonce implements sdk.Error.

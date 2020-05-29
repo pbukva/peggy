@@ -6,7 +6,7 @@ require (
 	github.com/aristanetworks/goarista v0.0.0-20190528200627-2e9fd846018e // indirect
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3 // indirect
 	github.com/cespare/cp v1.1.1 // indirect
-	github.com/cosmos/cosmos-sdk v0.38.1
+	github.com/cosmos/cosmos-sdk v0.37.11
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/ethereum/go-ethereum v1.9.8
@@ -28,12 +28,7 @@ require (
 	github.com/spf13/viper v1.6.3
 	github.com/stretchr/testify v1.5.1
 	github.com/tendermint/go-amino v0.15.1
-	github.com/tendermint/tendermint v0.33.0
+	github.com/tendermint/tendermint v0.32.10
 	github.com/tendermint/tm-db v0.2.0
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
-)
-
-replace (
-	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.0.0-20200422231629-ebffc60f3163
-	github.com/tendermint/tendermint => github.com/tendermint/tendermint v0.0.0-20200429152527-d85e2e52d257
 )
